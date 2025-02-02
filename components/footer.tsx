@@ -21,9 +21,10 @@ export default function Footer() {
           <a href="#" className="hover:text-gray-300 transition-colors">
             Terms of Service
           </a>
-          <a href="#" className="hover:text-gray-300 transition-colors">
-            Contact Us
-          </a>
+          <a href="/#contact" className="hover:text-gray-300 transition-colors">
+  Contact Us
+</a>
+
         </div>
       </div>
     </footer>
