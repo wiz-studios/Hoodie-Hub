@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --border: 0 0% 89.8%; /* Ensure this variable is defined */
+    /* Other variables omitted for brevity */
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --border: 0 0% 14.9%; /* Ensure this variable is defined for dark mode */
+    /* Other variables omitted for brevity */
+  }
+
+  * {
+    @apply border-border; /* This will now work after defining `border-border` in tailwind.config.js */
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
