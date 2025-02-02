@@ -20,7 +20,8 @@ export default function AutoSlidingBanner() {
   }, [])
 
   return (
-    <div className="relative h-screen overflow-hidden">
+    <div className="relative h-[80vh] md:h-screen overflow-hidden">
+      {/* Background Image */}
       <AnimatePresence initial={false}>
         <motion.img
           key={currentIndex}
@@ -33,10 +34,14 @@ export default function AutoSlidingBanner() {
           transition={{ duration: 0.5 }}
         />
       </AnimatePresence>
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">Premium Streetwear</h1>
+
+      {/* Overlay Content */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 px-6 text-center">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+          Premium Streetwear
+        </h1>
         <button
-          className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition-colors"
+          className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors text-sm md:text-base"
           onClick={() => {
             document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })
           }}
@@ -47,4 +52,3 @@ export default function AutoSlidingBanner() {
     </div>
   )
 }
-
