@@ -1,0 +1,71 @@
+"use client"
+
+import { useState } from "react"
+import { motion } from "framer-motion"
+import Image from "next/image"
+import { useCart } from "../contexts/cart-context"
+import { toast } from "react-toastify"
+
+interface ProductCardProps {
+  id: string
+  name: string
+  price: number | string
+  image: string
+  hoverImage: string
+}
+
+export default function ProductCard({ id, name, price, image, hoverImage }: ProductCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+  const { addToCart } = useCart()
+
+  const handleAddToCart = () => {
+    addToCart({ id, name, price: typeof price === "number" ? price : Number.parseFloat(price), quantity: 1 })
+    toast.success(`${name} added to cart!`, {
+      position: "bottom-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    })
+  }
+
+  return (
+    <motion.div
+      className="bg-gray-900 rounded-lg overflow-hidden relative"
+      whileHover={{ scale: 1.05 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+    >
+      <div className="relative aspect-w-3 aspect-h-4 overflow-hidden">
+        <Image
+          src={isHovered ? hoverImage : image}
+          alt={name}
+          layout="fill"
+          objectFit="cover"
+          className="transition-transform duration-300 transform hover:scale-110"
+        />
+        {isHovered && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
+            <button className="bg-white text-black px-4 py-2 rounded-full font-semibold hover:bg-gray-200 transition-colors">
+              Quick View
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="p-4">
+        <h3 className="text-lg font-semibold">{name}</h3>
+        <p className="text-gray-400">
+          ${typeof price === "number" ? price.toFixed(2) : Number.parseFloat(price).toFixed(2)}
+        </p>
+        <button
+          className="mt-2 w-full bg-white text-black py-2 rounded font-semibold hover:bg-gray-200 transition-colors"
+          onClick={handleAddToCart}
+        >
+          Add to Cart
+        </button>
+      </div>
+    </motion.div>
+  )
+}
+
