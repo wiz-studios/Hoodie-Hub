@@ -1,145 +1,116 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useProducts } from "../contexts/product-context"
+import { useState } from "react";
+import { useProducts } from "../contexts/product-context";
+import { toast } from "react-toastify";
 
 export default function AddProductForm() {
-  const router = useRouter()
-  const { addProduct } = useProducts()
-  const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    price: "",
-  })
-  const [image, setImage] = useState<File | null>(null)
-  const [hoverImage, setHoverImage] = useState<File | null>(null)
-  const [isClient, setIsClient] = useState(false)
+  const { addProduct, deleteProduct, products } = useProducts();
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [image, setImage] = useState("");
+  const [hoverImage, setHoverImage] = useState("");
+  const [quantity, setQuantity] = useState("");
 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prevData) => ({ ...prevData, [name]: value }))
-  }
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, isHover: boolean) => {
-    if (e.target.files && e.target.files[0]) {
-      if (isHover) {
-        setHoverImage(e.target.files[0])
-      } else {
-        setImage(e.target.files[0])
-      }
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!image || !hoverImage) {
-      alert("Please select both images")
-      return
+  const handleAddProduct = () => {
+    if (!name || !price || !image || !quantity) {
+      toast.error("Please fill in all fields.");
+      return;
     }
 
-    const imageUrl = URL.createObjectURL(image)
-    const hoverImageUrl = URL.createObjectURL(hoverImage)
+    const newProduct = {
+      id: crypto.randomUUID(),
+      name,
+      price: Number(price), // ✅ Ensure price is a number
+      image: image.trim() || "/placeholder.svg",
+      hoverImage: hoverImage.trim() || "/placeholder.svg",
+      quantity: Number(quantity), // ✅ Ensure quantity is a number
+    };
 
-    addProduct({
-      ...formData,
-      image: imageUrl,
-      hoverImage: hoverImageUrl,
-    })
+    addProduct(newProduct);
+    toast.success("Product added successfully!");
 
-    alert("Product added successfully!")
-    setFormData({ id: "", name: "", price: "" })
-    setImage(null)
-    setHoverImage(null)
-    router.refresh()
-  }
+    setName("");
+    setPrice("");
+    setImage("");
+    setHoverImage("");
+    setQuantity("");
+  };
 
-  if (!isClient) {
-    return <div>Loading...</div>
-  }
+  const handleDelete = (id: string) => {
+    deleteProduct(id);
+    toast.success("Product deleted!");
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-      <div>
-        <label htmlFor="id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Product ID
-        </label>
-        <input
-          type="text"
-          id="id"
-          name="id"
-          value={formData.id}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    <div className="max-w-lg mx-auto p-4 bg-gray-900 text-white rounded-lg">
+      <h2 className="text-2xl font-bold mb-4">Add Product</h2>
+      <input
+        type="text"
+        placeholder="Product Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-full p-2 mb-2 bg-gray-800 text-white rounded"
+      />
+      <input
+        type="text"
+        placeholder="Price"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        className="w-full p-2 mb-2 bg-gray-800 text-white rounded"
+      />
+      <input
+        type="text"
+        placeholder="Image URL"
+        value={image}
+        onChange={(e) => setImage(e.target.value)}
+        className="w-full p-2 mb-2 bg-gray-800 text-white rounded"
+      />
+      <input
+        type="text"
+        placeholder="Hover Image URL"
+        value={hoverImage}
+        onChange={(e) => setHoverImage(e.target.value)}
+        className="w-full p-2 mb-2 bg-gray-800 text-white rounded"
+      />
+      <input
+        type="number"
+        placeholder="Quantity"
+        value={quantity}
+        onChange={(e) => setQuantity(e.target.value)}
+        className="w-full p-2 mb-4 bg-gray-800 text-white rounded"
+      />
+      <button
+        onClick={handleAddProduct}
+        className="w-full bg-white text-black py-2 rounded font-semibold hover:bg-gray-200 transition-colors"
+      >
+        Add Product
+      </button>
+
+      {/* Product List */}
+      <h2 className="text-2xl font-bold mt-6">Product Collection</h2>
+      <div className="mt-4">
+        {products.length === 0 ? (
+          <p className="text-gray-400">No products added yet.</p>
+        ) : (
+          <ul className="space-y-4">
+            {products.map((product) => (
+              <li key={product.id} className="bg-gray-800 p-4 rounded flex justify-between items-center">
+                <div>
+                  <p className="text-lg font-semibold">{product.name}</p>
+                  <p className="text-gray-400">${product.price} | Qty: {product.quantity}</p>
+                </div>
+                <button
+                  onClick={() => handleDelete(product.id)}
+                  className="bg-red-500 px-4 py-2 text-white rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Product Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Price
-        </label>
-        <input
-          type="text"
-          id="price"
-          name="price"
-          value={formData.price}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Image
-        </label>
-        <input
-          type="file"
-          id="image"
-          name="image"
-          onChange={(e) => handleImageChange(e, false)}
-          required
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="hoverImage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Hover Image
-        </label>
-        <input
-          type="file"
-          id="hoverImage"
-          name="hoverImage"
-          onChange={(e) => handleImageChange(e, true)}
-          required
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      <div className="mt-6">
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition-colors"
-        >
-          Add Product
-        </button>
-      </div>
-    </form>
-  )
+    </div>
+  );
 }

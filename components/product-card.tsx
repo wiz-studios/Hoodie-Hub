@@ -1,34 +1,57 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import Image from "next/image"
-import { useCart } from "../contexts/cart-context"
-import { toast } from "react-toastify"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useCart } from "../contexts/cart-context";
+import { toast } from "react-toastify";
+import { useProducts } from "../contexts/product-context";
 
 interface ProductCardProps {
-  id: string
-  name: string
-  price: number | string
-  image: string
-  hoverImage: string
+  id: string;
+  name: string;
+  price: number | string;
+  image: string;
+  hoverImage: string;
+  stock: number;
 }
 
-export default function ProductCard({ id, name, price, image, hoverImage }: ProductCardProps) {
-  const [isHovered, setIsHovered] = useState(false)
-  const { addToCart } = useCart()
-
+export function ProductCard({ id, name, price, image, hoverImage, stock }: ProductCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const { addToCart } = useCart();
+  const { updateStock } = useProducts();
   const handleAddToCart = () => {
-    addToCart({ id, name, price: typeof price === "number" ? price : Number.parseFloat(price), quantity: 1 })
-    toast.success(`${name} added to cart!`, {
-      position: "bottom-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    })
-  }
+    if (stock > 0) {
+      addToCart({
+        id,
+        name,
+        price: typeof price === "number" ? price : Number.parseFloat(price),
+        quantity: 1, // ✅ Always adding one item at a time
+        image,
+      });
+  
+      updateStock(id, -1); // ✅ Ensure stock decreases by exactly 1
+  
+      toast.success(`${name} added to cart!`, {
+        position: "bottom-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } else {
+      toast.error(`${name} is out of stock!`, {
+        position: "bottom-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  };
+  
 
   return (
     <motion.div
@@ -37,11 +60,12 @@ export default function ProductCard({ id, name, price, image, hoverImage }: Prod
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <div className="relative aspect-w-3 aspect-h-4 overflow-hidden">
+      <div className="relative w-full h-80 overflow-hidden">
         <Image
           src={isHovered ? hoverImage : image}
           alt={name}
-          layout="fill"
+          width={300}
+          height={400}
           objectFit="cover"
           className="transition-transform duration-300 transform hover:scale-110"
         />
@@ -58,14 +82,17 @@ export default function ProductCard({ id, name, price, image, hoverImage }: Prod
         <p className="text-gray-400">
           ${typeof price === "number" ? price.toFixed(2) : Number.parseFloat(price).toFixed(2)}
         </p>
+        <p className="text-sm text-gray-500">Stock: {stock}</p>
         <button
-          className="mt-2 w-full bg-white text-black py-2 rounded font-semibold hover:bg-gray-200 transition-colors"
+          className={`mt-2 w-full py-2 rounded font-semibold transition-colors ${
+            stock > 0 ? "bg-white text-black hover:bg-gray-200" : "bg-gray-400 text-gray-700 cursor-not-allowed"
+          }`}
           onClick={handleAddToCart}
+          disabled={stock === 0}
         >
-          Add to Cart
+          {stock > 0 ? "Add to Cart" : "Out of Stock"}
         </button>
       </div>
     </motion.div>
-  )
+  );
 }
-

@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useCart } from "../contexts/cart-context"
-import { Plus, Minus, Trash2 } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
+import { useCart } from "../contexts/cart-context";
+import { Plus, Minus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function CartPageClient() {
-  const { cart, removeFromCart, updateQuantity, getCartTotal } = useCart()
+  const { cart, removeFromCart, updateQuantity, getCartTotal } = useCart();
 
   if (!cart) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
@@ -17,7 +17,7 @@ export default function CartPageClient() {
       <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
       {cart.length === 0 ? (
         <p>
-          Your cart is empty.{" "}
+          Your cart is empty. {" "}
           <Link href="/#products" className="text-blue-500 hover:underline">
             Continue shopping
           </Link>
@@ -28,16 +28,25 @@ export default function CartPageClient() {
             {cart.map((item) => (
               <div key={item.id} className="flex items-center justify-between border-b pb-4">
                 <div className="flex items-center space-x-4">
-                  <Image
-                    src={item.image || "/placeholder.svg"}
-                    alt={item.name}
-                    width={64}
-                    height={64}
-                    className="object-cover rounded-md"
-                  />
+                  {/* Ensure image is included and fallback to a placeholder */}
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={64}
+                      height={64}
+                      className="object-cover rounded-md"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded-md">
+                      <span className="text-gray-500">No Image</span>
+                    </div>
+                  )}
                   <div>
                     <h2 className="font-semibold">{item.name}</h2>
-                    <p className="text-gray-600">${(Number.parseFloat(item.price) || 0).toFixed(2)}</p>
+                    <p className="text-gray-600">
+                      ${typeof item.price === "string" ? parseFloat(item.price).toFixed(2) : item.price.toFixed(2)}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -78,6 +87,5 @@ export default function CartPageClient() {
         </>
       )}
     </div>
-  )
+  );
 }
-

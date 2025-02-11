@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { ShoppingCart, X, Menu } from "lucide-react"
-import { useCart } from "../contexts/cart-context"
+import { useState } from "react";
+import Link from "next/link";
+import { ShoppingCart, X, Menu } from "lucide-react";
+import { useCart } from "../contexts/cart-context";
 
 export default function Navbar() {
-  const { cart, removeFromCart, getCartTotal, getCartCount } = useCart()
-  const [isCartOpen, setIsCartOpen] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { cart, removeFromCart, getCartTotal, getCartCount } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const toggleCart = () => setIsCartOpen(!isCartOpen)
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+  const toggleCart = () => setIsCartOpen(!isCartOpen);
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
     <nav className="bg-background bg-opacity-50 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
@@ -23,11 +23,21 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-4 items-center">
-          <Link href="/" className="text-primary hover:text-secondary transition-colors">Home</Link>
-          <Link href="/#products" className="text-primary hover:text-secondary transition-colors">Shop</Link>
-          <Link href="/#about" className="text-primary hover:text-secondary transition-colors">About</Link>
-          <Link href="/#contact" className="text-primary hover:text-secondary transition-colors">Contact</Link>
-          <Link href="/admin/add-product" className="text-primary hover:text-secondary transition-colors">Admin</Link>
+          <Link href="/" className="text-primary hover:text-secondary transition-colors">
+            Home
+          </Link>
+          <Link href="/#products" className="text-primary hover:text-secondary transition-colors">
+            Shop
+          </Link>
+          <Link href="/#about" className="text-primary hover:text-secondary transition-colors">
+            About
+          </Link>
+          <Link href="/#contact" className="text-primary hover:text-secondary transition-colors">
+            Contact
+          </Link>
+          <Link href="/admin/add-product" className="text-primary hover:text-secondary transition-colors">
+            Admin
+          </Link>
         </div>
 
         {/* Cart & Mobile Menu */}
@@ -36,7 +46,7 @@ export default function Navbar() {
           <div className="relative">
             <button onClick={toggleCart} className="flex items-center text-primary">
               <ShoppingCart className="w-6 h-6" />
-              <span className="ml-1">{getCartCount()}</span>
+              <span className="ml-1">{String(getCartCount())}</span> {/* ✅ Fixed TypeScript Error */}
             </button>
             {isCartOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-background rounded-md shadow-lg overflow-hidden z-20">
@@ -46,7 +56,7 @@ export default function Navbar() {
                       <div className="flex-1">
                         <p className="text-primary">{item.name}</p>
                         <p className="text-secondary">
-                          ${Number.parseFloat(item.price).toFixed(2)} x {item.quantity}
+                          ${Number.parseFloat(String(item.price)).toFixed(2)} x {item.quantity}
                         </p>
                       </div>
                       <button onClick={() => removeFromCart(item.id)} className="text-accent hover:text-secondary">
@@ -101,5 +111,5 @@ export default function Navbar() {
         </div>
       )}
     </nav>
-  )
+  );
 }
