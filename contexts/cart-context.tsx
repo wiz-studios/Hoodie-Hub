@@ -75,14 +75,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart((prevCart) => {
       return prevCart.map((item) => {
         if (item.id === productId) {
-          // ✅ Ensure the quantity never goes below 1
-          const updatedQuantity = Math.max(1, newQuantity);
-          return { ...item, quantity: updatedQuantity };
+          const previousQuantity = item.quantity; // Get the previous quantity
+          const change = newQuantity - previousQuantity; // Determine the difference
+  
+          updateStock(productId, -change); // Reduce stock when increasing quantity, restore stock when decreasing
+          
+          return { ...item, quantity: newQuantity };
         }
         return item;
       });
     });
   };
+  
   
 
   const getCartTotal = () => {
