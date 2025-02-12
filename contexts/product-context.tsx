@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 
 export interface Product {
   id: string;
@@ -79,9 +79,9 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   // ✅ NEW FIX: Ensure stock updates happen outside render
-  const updateStock = (productId: string, change: number) => {
+  const updateStock = useCallback((productId: string, change: number) => {
     setStockUpdates((prevUpdates) => [...prevUpdates, { productId, change }]);
-  };
+  }, []);
 
   const getStock = (productId: string): number => {
     const product = products.find((product) => product.id === productId);
