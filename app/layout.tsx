@@ -1,24 +1,23 @@
-import { CartProvider } from "../contexts/cart-context"
-import { ProductProvider } from "../contexts/product-context"
-import "../styles/globals.css"
-import type React from "react"
+import { CartProvider } from "../contexts/cart-context";
+import { ProductProvider } from "../contexts/product-context";
+import { WishlistProvider } from "../contexts/wishlist-context"; 
+import "../styles/globals.css";
+import type React from "react";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <body>
         <ProductProvider>
-          <CartProvider>{children}</CartProvider>
+          <CartProvider>
+            <WishlistProvider>{children}</WishlistProvider>
+          </CartProvider>
         </ProductProvider>
       </body>
     </html>
-  )
+  );
 }
-
-
-
-import './globals.css'

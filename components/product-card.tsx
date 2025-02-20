@@ -1,38 +1,70 @@
 "use client";
+import { useState } from "react"; // React's useState hook for managing component state
+import { motion } from "framer-motion"; // Framer Motion for animations
+import Image from "next/image"; // Next.js Image component for optimized images
+import { useCart } from "../contexts/cart-context"; // Custom hook to manage cart context
+import { toast } from "react-toastify"; // Toast notifications for user feedback
+import { useProducts } from "../contexts/product-context"; // Custom hook to manage product context
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { useCart } from "../contexts/cart-context";
-import { toast } from "react-toastify";
-import { useProducts } from "../contexts/product-context";
-
+// Define the interface for the ProductCardProps
 interface ProductCardProps {
-  id: string;
-  name: string;
-  price: number | string;
-  image: string;
-  hoverImage: string;
-  stock: number;
+  id: string; // Unique identifier for the product
+  name: string; // Name of the product
+  price: number | string; // Price of the product (can be a number or string)
+  image: string; // URL of the main product image
+  hoverImage: string; // URL of the image displayed on hover
+  stock: number; // Stock availability of the product
 }
 
+// Export the ProductCard functional component
 export function ProductCard({ id, name, price, image, hoverImage, stock }: ProductCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const { addToCart } = useCart();
-  const { updateStock } = useProducts();
+  const [isHovered, setIsHovered] = useState(false); // State to track if the card is hovered
+  const [isFavorited, setIsFavorited] = useState(false); // State to track if the product is favorited
+
+  const { addToCart } = useCart(); // Function to add products to the cart from the cart context
+  const { updateStock } = useProducts(); // Function to update product stock from the product context
+
+  // Handler for adding the product to the cart
   const handleAddToCart = () => {
     if (stock > 0) {
       addToCart({
         id,
         name,
-        price: typeof price === "number" ? price : Number.parseFloat(price),
-        quantity: 1, // ✅ Always adding one item at a time
+        price: typeof price === "number" ? price : Number.parseFloat(price), // Convert price to a number if it's a string
+        quantity: 1, // Add one item at a time
         image,
       });
-  
-      updateStock(id, -1); // ✅ Ensure stock decreases by exactly 1
-  
-      toast.success(`${name} added to cart!`, {
+
+      updateStock(id, -1); // Decrease the stock by 1
+
+      // Show a success toast notification with KES currency
+      toast.success(`${name} added to cart for KES ${typeof price === "number" ? price.toFixed(2) : Number.parseFloat(price).toFixed(2)}!`, {
+        position: "bottom-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+    } else {
+      toast.error(`${name} is out of stock!`, {
+        position: "bottom-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+    }
+  };
+
+  // Handler for toggling the favorite state
+  const handleFavoriteToggle = () => {
+    setIsFavorited((prev) => !prev); // Toggle the favorite state
+
+    // Show a toast notification based on whether the product was added or removed from favorites
+    if (!isFavorited) {
+      toast.success(`${name} added to favorites!`, {
         position: "bottom-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -41,7 +73,7 @@ export function ProductCard({ id, name, price, image, hoverImage, stock }: Produ
         draggable: true,
       });
     } else {
-      toast.error(`${name} is out of stock!`, {
+      toast.info(`${name} removed from favorites!`, {
         position: "bottom-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -51,7 +83,6 @@ export function ProductCard({ id, name, price, image, hoverImage, stock }: Produ
       });
     }
   };
-  
 
   return (
     <motion.div
@@ -60,7 +91,8 @@ export function ProductCard({ id, name, price, image, hoverImage, stock }: Produ
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <div className="relative w-full h-80 overflow-hidden">
+      {/* Product Image Section */}
+      <div className="relative w-full h-80 overflow-hidden"> {/* Container for the product image */}
         <Image
           src={isHovered ? hoverImage : image}
           alt={name}
@@ -77,22 +109,40 @@ export function ProductCard({ id, name, price, image, hoverImage, stock }: Produ
           </div>
         )}
       </div>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold">{name}</h3>
+
+      {/* Product Details Section */}
+      <div className="p-4"> {/* Container for product details */}
+        <h3 className="text-lg font-semibold">{name}</h3> {/* Product name */}
         <p className="text-gray-400">
-          ${typeof price === "number" ? price.toFixed(2) : Number.parseFloat(price).toFixed(2)}
+          KES {typeof price === "number" ? price.toFixed(2) : Number.parseFloat(price).toFixed(2)} {/* Display price in KES */}
         </p>
-        <p className="text-sm text-gray-500">Stock: {stock}</p>
+        <p className="text-sm text-gray-500">Stock: {stock}</p> {/* Stock availability */}
+
+        {/* Favorite Button */}
+        <button
+          onClick={handleFavoriteToggle} // Call handleFavoriteToggle when clicked
+          className="absolute top-2 right-2 p-2 rounded-full transition-colors" // Position and styling for the heart button
+          style={{
+            backgroundColor: isFavorited ? "red" : "transparent", // Change background color if favorited
+            border: isFavorited ? "none" : "1px solid white", // Add a border if not favorited
+          }}
+        >
+          <span className="text-white text-lg" role="img" aria-label="favorite">
+            ❤️ {/* Heart emoji */}
+          </span>
+        </button>
+
+        {/* Add to Cart Button */}
         <button
           className={`mt-2 w-full py-2 rounded font-semibold transition-colors ${
             stock > 0 ? "bg-white text-black hover:bg-gray-200" : "bg-gray-400 text-gray-700 cursor-not-allowed"
-          }`}
-          onClick={handleAddToCart}
-          disabled={stock === 0}
+          }`} // Conditional styling based on stock availability
+          onClick={handleAddToCart} // Call handleAddToCart when clicked
+          disabled={stock === 0} // Disable the button if out of stock
         >
-          {stock > 0 ? "Add to Cart" : "Out of Stock"}
+          {stock > 0 ? "Add to Cart" : "Out of Stock"} {/* Button text based on stock */}
         </button>
       </div>
     </motion.div>
-  );
+  )
 }

@@ -1,17 +1,19 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
-import { ShoppingCart, X, Menu } from "lucide-react";
-import { useCart } from "../contexts/cart-context";
+import { useState } from "react"
+import Link from "next/link"
+import { ShoppingCart, X, Menu, Heart } from "lucide-react"
+import { useCart } from "../contexts/cart-context"
+import { useWishlist } from "../contexts/wishlist-context"
 
 export default function Navbar() {
-  const { cart, removeFromCart, getCartTotal, getCartCount } = useCart();
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { cart, removeFromCart, getCartTotal, getCartCount } = useCart()
+  const { wishlist } = useWishlist()
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const toggleCart = () => setIsCartOpen(!isCartOpen);
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleCart = () => setIsCartOpen(!isCartOpen)
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
   return (
     <nav className="bg-background bg-opacity-50 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
@@ -38,6 +40,10 @@ export default function Navbar() {
           <Link href="/admin/add-product" className="text-primary hover:text-secondary transition-colors">
             Admin
           </Link>
+          <Link href="/wishlist" className="text-primary hover:text-secondary transition-colors flex items-center">
+            <Heart className="w-5 h-5 mr-1" />
+            <span>{wishlist.length}</span>
+          </Link>
         </div>
 
         {/* Cart & Mobile Menu */}
@@ -46,7 +52,7 @@ export default function Navbar() {
           <div className="relative">
             <button onClick={toggleCart} className="flex items-center text-primary">
               <ShoppingCart className="w-6 h-6" />
-              <span className="ml-1">{String(getCartCount())}</span> {/* ✅ Fixed TypeScript Error */}
+              <span className="ml-1">{String(getCartCount())}</span>
             </button>
             {isCartOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-background rounded-md shadow-lg overflow-hidden z-20">
@@ -95,7 +101,11 @@ export default function Navbar() {
             <Link href="/" className="text-primary hover:text-secondary transition-colors" onClick={toggleMenu}>
               Home
             </Link>
-            <Link href="/#products" className="text-primary hover:text-secondary transition-colors" onClick={toggleMenu}>
+            <Link
+              href="/#products"
+              className="text-primary hover:text-secondary transition-colors"
+              onClick={toggleMenu}
+            >
               Shop
             </Link>
             <Link href="/#about" className="text-primary hover:text-secondary transition-colors" onClick={toggleMenu}>
@@ -104,12 +114,25 @@ export default function Navbar() {
             <Link href="/#contact" className="text-primary hover:text-secondary transition-colors" onClick={toggleMenu}>
               Contact
             </Link>
-            <Link href="/admin/add-product" className="text-primary hover:text-secondary transition-colors" onClick={toggleMenu}>
+            <Link
+              href="/admin/add-product"
+              className="text-primary hover:text-secondary transition-colors"
+              onClick={toggleMenu}
+            >
               Admin
+            </Link>
+            <Link
+              href="/wishlist"
+              className="text-primary hover:text-secondary transition-colors flex items-center"
+              onClick={toggleMenu}
+            >
+              <Heart className="w-5 h-5 mr-1" />
+              <span>Wishlist ({wishlist.length})</span>
             </Link>
           </div>
         </div>
       )}
     </nav>
-  );
+  )
 }
+
