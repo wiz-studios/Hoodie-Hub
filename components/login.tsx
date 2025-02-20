@@ -1,9 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Card } from "../components/ui/card"; // Corrected import statement
+import { Card } from "@/components/ui/card";
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -27,7 +28,7 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -51,7 +52,6 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    // Sign up user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -63,17 +63,16 @@ export default function LoginPage() {
       return;
     }
 
-    // Ensure user ID exists before inserting into users table
     if (!data.user) {
       setError("User sign-up failed.");
       setLoading(false);
       return;
     }
 
-    // Insert user details into `users` table
-    const { error: insertError } = await supabase
-      .from("users")
-      .insert([{ id: data.user.id, name, phone, email }]); // ✅ Ensure email is included
+    // Store additional user details in Supabase
+    const { error: insertError } = await supabase.from("users").insert([
+      { id: data.user.id, name, phone, email },
+    ]);
 
     if (insertError) {
       setError("Failed to save user details: " + insertError.message);
@@ -91,40 +90,47 @@ export default function LoginPage() {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="w-full max-w-sm"
+        className="w-full max-w-md md:max-w-lg lg:max-w-xl"
       >
-        <Card>
+        <Card className="rounded-2xl shadow-lg p-6 bg-white">
+          {/* Header Text */}
           <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6">
             {isSignUp ? "Create an Account" : "Welcome Back"}
           </h1>
 
+          {/* Display error message if any */}
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
+          {/* Signup Fields - Show only if user is signing up */}
           {isSignUp && (
-            <>
-              <div className="mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Full Name Input */}
+              <div className="w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                 <input
                   type="text"
                   placeholder="Full Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="input"
+                  className="w-full px-4 py-2 border rounded-xl bg-white text-gray-900 shadow-sm"
                 />
               </div>
-              <div className="mb-4">
+
+              {/* Phone Number Input */}
+              <div className="w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                 <input
                   type="text"
                   placeholder="Phone Number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="input"
+                  className="w-full px-4 py-2 border rounded-xl bg-white text-gray-900 shadow-sm"
                 />
               </div>
-            </>
+            </div>
           )}
 
+          {/* Email Address Input */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
             <input
@@ -132,29 +138,49 @@ export default function LoginPage() {
               placeholder="Email Address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input"
+              className="w-full px-4 py-2 border rounded-xl bg-white text-gray-900 shadow-sm"
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input"
-            />
+          {/* Password & Confirm Password Fields */}
+          <div className="grid grid-cols-1 gap-4 mb-4">
+            {/* Password Input (Same width as Email) */}
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 border rounded-xl bg-white text-gray-900 shadow-sm"
+              />
+            </div>
+
+            {/* Confirm Password Input - Only for Sign Up */}
+            {isSignUp && (
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-xl bg-white text-gray-900 shadow-sm"
+                />
+              </div>
+            )}
           </div>
 
+          {/* Submit Button */}
           <button
             onClick={isSignUp ? handleSignUp : handleLogin}
-            className="mt-4 w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 rounded-lg hover:shadow-lg hover:bg-gradient-to-l transition duration-300"
+            className="mt-4 w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:bg-gradient-to-l transition duration-300"
             disabled={loading}
           >
             {loading ? "Loading..." : isSignUp ? "Sign Up" : "Log In"}
           </button>
 
+          {/* Toggle Sign Up / Login */}
           <p className="mt-4 text-center text-gray-600">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}
             <button onClick={() => setIsSignUp(!isSignUp)} className="ml-2 text-orange-500 font-medium hover:underline">

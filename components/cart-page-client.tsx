@@ -78,7 +78,7 @@ export default function CartPageClient() {
               <span className="text-xl font-semibold">Total:</span>
               <span className="text-xl font-semibold">${(getCartTotal() || 0).toFixed(2)}</span>
             </div>
-            <Link href="/checkout" className="block w-full">
+            <Link href="/login" className="block w-full">
               <button className="w-full bg-black text-white py-3 px-6 rounded-full font-semibold hover:bg-gray-800 transition-colors text-lg">
                 Proceed to Checkout
               </button>
