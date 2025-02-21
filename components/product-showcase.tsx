@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProductCard } from "./product-card"; // ✅ Fixed import (named import)
+import { ProductCard } from "./product-card";
 import { useProducts } from "../contexts/product-context";
 
 export default function ProductShowcase() {
@@ -27,9 +27,9 @@ export default function ProductShowcase() {
               id={product.id}
               name={product.name}
               price={product.price}
-              image={product.image}
-              hoverImage={product.hoverImage}
-              stock={product.quantity} // ✅ Ensure stock is passed correctly
+              image_url={product.image_url} // ✅ Fixed field name
+              hover_image_url={product.hover_image_url} // ✅ Fixed field name
+              stock={product.stock} // ✅ Corrected from `quantity` to `stock`
             />
           ))
         ) : (

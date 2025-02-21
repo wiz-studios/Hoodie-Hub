@@ -1,13 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useCart } from "../contexts/cart-context";
-
-// List of countries
-const countries = [
-  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
-  "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
-  // ... (rest of the countries)
-];
+import { countries } from "../utils/countries";
 
 export default function CheckoutForm() {
   const { getCartTotal, clearCart } = useCart();
@@ -54,15 +48,15 @@ export default function CheckoutForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-xl">
+    <form onSubmit={handleSubmit} className="max-w-lg mx-auto bg-[#09080d] p-8 rounded-2xl shadow-xl text-white">
       {/* Form Title */}
-      <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Checkout</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center text-[#fe6807]">Checkout</h2>
 
       {/* Full Name and Email Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {["name", "email"].map((field) => (
           <div key={field}>
-            <label htmlFor={field} className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor={field} className="block text-sm font-medium mb-1 text-white">
               {field === "name" ? "Full Name" : "Email"}
             </label>
             <input
@@ -72,7 +66,7 @@ export default function CheckoutForm() {
               value={formData[field as keyof typeof formData]}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-gray-100"
+              className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#191bdf] bg-[#191bdf] text-white"
             />
           </div>
         ))}
@@ -80,9 +74,7 @@ export default function CheckoutForm() {
 
       {/* Address Field */}
       <div className="mt-4">
-        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-          Address
-        </label>
+        <label htmlFor="address" className="block text-sm font-medium mb-1 text-white">Address</label>
         <input
           type="text"
           id="address"
@@ -90,7 +82,7 @@ export default function CheckoutForm() {
           value={formData.address}
           onChange={handleChange}
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-gray-100"
+          className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#191bdf] bg-[#191bdf] text-white"
         />
       </div>
 
@@ -98,9 +90,7 @@ export default function CheckoutForm() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
         {/* City */}
         <div>
-          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-            City
-          </label>
+          <label htmlFor="city" className="block text-sm font-medium mb-1 text-white">City</label>
           <input
             type="text"
             id="city"
@@ -108,15 +98,13 @@ export default function CheckoutForm() {
             value={formData.city}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-gray-100"
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#191bdf] bg-[#191bdf] text-white"
           />
         </div>
 
         {/* Country with Autocomplete */}
         <div className="relative">
-          <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-            Country
-          </label>
+          <label htmlFor="country" className="block text-sm font-medium mb-1 text-white">Country</label>
           <input
             type="text"
             id="country"
@@ -124,14 +112,14 @@ export default function CheckoutForm() {
             value={formData.country}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-gray-100"
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#191bdf] bg-[#191bdf] text-white"
           />
           {filteredCountries.length > 0 && (
-            <ul className="absolute bg-white border border-gray-300 w-full mt-1 rounded-lg shadow-md max-h-40 overflow-auto z-10">
+            <ul className="absolute bg-[#09080d] border border-gray-600 w-full mt-1 rounded-lg shadow-md max-h-40 overflow-auto z-10 text-white">
               {filteredCountries.map((country) => (
                 <li
                   key={country}
-                  className="p-2 hover:bg-blue-100 cursor-pointer text-gray-800"
+                  className="p-2 hover:bg-[#fe6807] cursor-pointer"
                   onClick={() => handleCountrySelect(country)}
                 >
                   {country}
@@ -143,9 +131,7 @@ export default function CheckoutForm() {
 
         {/* Zip Code */}
         <div>
-          <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">
-            Zip Code
-          </label>
+          <label htmlFor="zipCode" className="block text-sm font-medium mb-1 text-white">Zip Code</label>
           <input
             type="text"
             id="zipCode"
@@ -153,7 +139,7 @@ export default function CheckoutForm() {
             value={formData.zipCode}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-gray-100"
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#191bdf] bg-[#191bdf] text-white"
           />
         </div>
       </div>
@@ -161,14 +147,12 @@ export default function CheckoutForm() {
       {/* Total and Submit Button */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
-          <span className="text-lg font-semibold text-gray-800">Total:</span>
-          <span className="text-2xl font-bold text-blue-600">
-            ${(getCartTotal() || 0).toFixed(2)}
-          </span>
+          <span className="text-lg font-semibold">Total:</span>
+          <span className="text-2xl font-bold text-[#fe6807]">${(getCartTotal() || 0).toFixed(2)}</span>
         </div>
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 text-lg"
+          className="w-full bg-gradient-to-r from-[#191bdf] to-[#fe6807] text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg hover:from-[#fe6807] hover:to-[#191bdf] transition-all duration-300 text-lg"
         >
           Place Order
         </button>

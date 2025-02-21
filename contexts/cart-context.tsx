@@ -7,8 +7,9 @@ interface CartItem {
   id: string;
   name: string;
   price: number;
-  quantity: number;
+  stock: number;
   image: string;
+  quantity: number; // Ensure quantity is tracked separately
 }
 
 interface CartContextType {
@@ -18,6 +19,7 @@ interface CartContextType {
   updateQuantity: (id: string, newQuantity: number) => void;
   getCartTotal: () => number;
   getCartCount: () => number;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -25,8 +27,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const { updateStock, getStock } = useProducts();
-  const [stockUpdateQueue, setStockUpdateQueue] = useState<{ id: string, change: number }[]>([]);
-  const prevStockUpdateQueueRef = useRef<{ id: string, change: number }[]>([]);
+  const [stockUpdateQueue, setStockUpdateQueue] = useState<{ id: string; change: number }[]>([]);
+  const prevStockUpdateQueueRef = useRef<{ id: string; change: number }[]>([]);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
@@ -55,16 +57,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const currentStock = getStock(item.id);
 
       if (currentStock <= 0) {
-        return prevCart; // Do nothing if out of stock
+        return prevCart; // Prevent adding if out of stock
       }
 
       if (existingItem) {
-        setStockUpdateQueue((prevQueue) => [...prevQueue, { id: item.id, change: -1 }]);
-        return prevCart.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        );
+        if (existingItem.quantity < currentStock) {
+          setStockUpdateQueue((prevQueue) => [...prevQueue, { id: item.id, change: -1 }]);
+          return prevCart.map((cartItem) =>
+            cartItem.id === item.id
+              ? { ...cartItem, quantity: cartItem.quantity + 1 }
+              : cartItem
+          );
+        } else {
+          return prevCart; // Prevent exceeding stock
+        }
       } else {
         setStockUpdateQueue((prevQueue) => [...prevQueue, { id: item.id, change: -1 }]);
         return [...prevCart, { ...item, quantity: 1 }];
@@ -86,10 +92,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart((prevCart) => {
       return prevCart.map((item) => {
         if (item.id === productId) {
-          const previousQuantity = item.quantity; // Get the previous quantity
-          const change = newQuantity - previousQuantity; // Determine the difference
+          const currentStock = getStock(item.id);
 
-          // Ensure stock is updated correctly
+          if (newQuantity > currentStock) {
+            return item; // Prevent exceeding available stock
+          }
+
+          const previousQuantity = item.quantity;
+          const change = newQuantity - previousQuantity;
+
           if (change !== 0) {
             setStockUpdateQueue((prevQueue) => [...prevQueue, { id: productId, change: -change }]);
           }
@@ -109,8 +120,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return cart.reduce((count, item) => count + item.quantity, 0);
   };
 
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem("cart");
+  };
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, getCartTotal, getCartCount }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, getCartTotal, getCartCount, clearCart }}>
       {children}
     </CartContext.Provider>
   );

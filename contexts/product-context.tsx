@@ -1,22 +1,25 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+
+const supabase = createClientComponentClient();
 
 export interface Product {
   id: string;
   name: string;
   price: number;
-  image: string;
-  hoverImage: string;
-  quantity: number; // Stock quantity
+  image_url: string;
+  hover_image_url: string;
+  stock: number; // ✅ Ensure database column is named `stock`
 }
 
 interface ProductContextType {
   products: Product[];
-  addProduct: (product: Product) => void;
-  deleteProduct: (id: string) => void;
-  fetchProducts: () => void;
-  updateStock: (productId: string, change: number) => void;
+  addProduct: (product: Product) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  fetchProducts: () => Promise<void>;
+  updateStock: (productId: string, change: number) => Promise<void>;
   getStock: (productId: string) => number;
 }
 
@@ -24,68 +27,64 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [stockUpdates, setStockUpdates] = useState<{ productId: string; change: number }[]>([]);
 
-  // Fetch products from localStorage when component mounts
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Save products to localStorage when they change
-  useEffect(() => {
-    if (products.length > 0) {
-      localStorage.setItem("products", JSON.stringify(products));
-    }
-  }, [products]);
-
-  // ✅ NEW FIX: Apply stock updates safely in an effect
-  useEffect(() => {
-    if (stockUpdates.length > 0) {
-      setProducts((prevProducts) => {
-        return prevProducts.map((product) => {
-          const update = stockUpdates.find((u) => u.productId === product.id);
-          return update
-            ? { ...product, quantity: Math.max(0, product.quantity + update.change) }
-            : product;
-        });
-      });
-
-      // Clear stock updates after applying
-      setStockUpdates([]);
-    }
-  }, [stockUpdates]);
-
-  const fetchProducts = () => {
-    const savedProducts = localStorage.getItem("products");
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
+  const fetchProducts = async () => {
+    const { data, error } = await supabase.from("products").select("*");
+    if (error) {
+      console.error("Error fetching products:", error.message);
+    } else {
+      setProducts(data as Product[]);
     }
   };
 
-  const addProduct = (product: Product) => {
-    setProducts((prevProducts) => {
-      const updatedProducts = [...prevProducts, product];
-      localStorage.setItem("products", JSON.stringify(updatedProducts));
-      return updatedProducts;
-    });
+  const addProduct = async (product: Product) => {
+    const { data, error } = await supabase.from("products").insert([product]).select("*");
+    if (error) {
+      console.error("Error adding product:", error.message);
+    } else {
+      setProducts((prevProducts) => [...prevProducts, data[0]]);
+    }
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts((prevProducts) => {
-      const updatedProducts = prevProducts.filter((product) => product.id !== id);
-      localStorage.setItem("products", JSON.stringify(updatedProducts));
-      return updatedProducts;
-    });
+  const deleteProduct = async (id: string) => {
+    const { error } = await supabase.from("products").delete().match({ id });
+    if (error) {
+      console.error("Error deleting product:", error.message);
+    } else {
+      setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
+    }
   };
 
-  // ✅ NEW FIX: Ensure stock updates happen outside render
-  const updateStock = useCallback((productId: string, change: number) => {
-    setStockUpdates((prevUpdates) => [...prevUpdates, { productId, change }]);
-  }, []);
+  const updateStock = async (productId: string, change: number) => {
+    const product = products.find((p) => p.id === productId);
+    if (!product) {
+      console.error("Product not found:", productId);
+      return;
+    }
+
+    const newStock = Math.max(0, product.stock + change); // ✅ Ensure stock never goes negative
+
+    const { error } = await supabase
+      .from("products")
+      .update({ stock: newStock }) // ✅ Ensure correct field name
+      .eq("id", productId);
+
+    if (error) {
+      console.error("Error updating stock:", error.message, error.details);
+    } else {
+      setProducts((prevProducts) =>
+        prevProducts.map((p) => (p.id === productId ? { ...p, stock: newStock } : p)) // ✅ Ensure state updates correctly
+      );
+    }
+  };
 
   const getStock = (productId: string): number => {
-    const product = products.find((product) => product.id === productId);
-    return product ? product.quantity : 0;
+    const product = products.find((p) => p.id === productId);
+    return product ? product.stock : 0;
   };
 
   return (

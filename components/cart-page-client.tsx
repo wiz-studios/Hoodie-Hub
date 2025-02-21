@@ -17,7 +17,7 @@ export default function CartPageClient() {
       <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
       {cart.length === 0 ? (
         <p>
-          Your cart is empty. {" "}
+          Your cart is empty.{" "}
           <Link href="/#products" className="text-blue-500 hover:underline">
             Continue shopping
           </Link>
@@ -47,19 +47,26 @@ export default function CartPageClient() {
                     <p className="text-gray-600">
                       ${typeof item.price === "string" ? parseFloat(item.price).toFixed(2) : item.price.toFixed(2)}
                     </p>
+                    <p className="text-sm text-gray-500">In Stock: {item.stock}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => updateQuantity(item.id, (item.quantity || 1) - 1)}
+                    onClick={() => updateQuantity(item.id, (item.stock || 1) - 1)}
                     className="p-1 rounded-full bg-gray-200 hover:bg-gray-300"
+                    disabled={item.stock <= 1}
                   >
                     <Minus size={16} />
                   </button>
-                  <span>{item.quantity || 0}</span>
+                  <span>{item.stock || 0}</span>
                   <button
-                    onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                    onClick={() => {
+                      if (item.stock < item.stock) {
+                        updateQuantity(item.id, item.stock + 1);
+                      }
+                    }}
                     className="p-1 rounded-full bg-gray-200 hover:bg-gray-300"
+                    disabled={item.stock >= item.stock}
                   >
                     <Plus size={16} />
                   </button>
